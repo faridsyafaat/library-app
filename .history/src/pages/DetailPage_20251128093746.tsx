@@ -1,0 +1,23 @@
+import NavbarAfter from '@/components/layout/NavbarAfter';
+import DetailBookSection from '@/components/sections/DetailBookSection';
+import ReviewSection from '@/components/sections/ReviewSection';
+import RelatedBooks from "@/components/sections/RelatedBooks";
+import FooterSection from "@/components/layout/FooterSection";
+
+export default function DetailPage() {
+  // Dummy data untuk testing
+  const dummyBookId = 1;
+  const dummyCategory = "Novel";
+
+  return (
+    <>
+      <NavbarAfter />
+      <DetailBookSection />
+      <ReviewSection bookId={dummyBookId} />
+      <RelatedBooks 
+        categoryName={dummyCategory}
+        currentBookId={String(dummyBookId)} />
+      <FooterSection />
+    </>
+  );
+}

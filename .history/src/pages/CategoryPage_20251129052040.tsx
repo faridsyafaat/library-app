@@ -1,0 +1,87 @@
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import axios from "axios";
+import NavbarAfter from "@/components/layout/NavbarAfter";
+import FilterSidebar from "@/components/sidebar/Sidebar";
+import FooterSection from "@/components/layout/FooterSection";
+
+type Book = {
+  id: number;
+  title: string;
+  coverImage: string;
+  rating: number;
+  Author: { name: string };
+};
+
+export default function CategoryPage() {
+  const { id } = useParams();
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const res = await axios.get(
+          `https://be-library-api-xh3x6c5iiq-et.a.run.app/api/categories/${id}`
+        );
+        setBooks(res.data.data.books);
+      } catch (error) {
+        console.error(error);
+        setBooks([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, [id]);
+
+  return (
+    <>
+      <NavbarAfter />
+
+      <div className="container mx-auto mt-6">
+        <h1 className="text-2xl font-bold mb-6">Book List</h1>
+
+        <div className="flex gap-6">
+          {/* Sidebar kiri 1/3 */}
+          <div className="w-1/3">
+            <FilterSidebar />
+          </div>
+
+          {/* Konten kanan 2/3 */}
+          <div className="w-2/3">
+            {loading ? (
+              <p>Loading books...</p>
+            ) : books.length === 0 ? (
+              <p>No books available in this category.</p>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                {books.map((book) => (
+                  <Link
+                    key={book.id}
+                    to={`/books/${book.id}`}
+                    className="bg-white rounded-xl shadow-sm p-2 hover:shadow-md cursor-pointer"
+                  >
+                    <img
+                      src={book.coverImage}
+                      alt={book.title}
+                      className="w-full h-[240px] object-cover rounded-lg"
+                    />
+                    <h3 className="font-semibold mt-3 line-clamp-2">
+                      {book.title}
+                    </h3>
+                    <p className="text-sm text-gray-600">{book.Author?.name}</p>
+                    <span className="text-sm font-medium">{book.rating} ⭐</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <FooterSection />
+    </>
+  );
+}

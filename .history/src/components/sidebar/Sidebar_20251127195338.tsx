@@ -1,0 +1,14 @@
+import CategoryFilter from "./CategoryFilter";
+import RatingFilter from "./RatingFilter";
+
+export default function FilterSidebar() {
+  return (
+    <aside className="w-64 bg-white rounded-xl shadow-sm p-6 h-fit">
+      <h2 className="font-semibold text-lg mb-4"></h2>
+      <h3 className="font-medium mb-2">Category</h3>
+      <CategoryFilter />
+      <div className="border-b my-4" />
+      <RatingFilter />
+    </aside>
+  );
+}

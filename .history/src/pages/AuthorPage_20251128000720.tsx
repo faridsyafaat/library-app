@@ -1,0 +1,90 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import NavbarAfter from "@/components/layout/NavbarAfter";  
+import FooterSection from "@/components/layout/FooterSection";
+
+interface Book {
+  id: number;
+  title: string;
+  author: string;
+  cover: string | null;
+  rating: number;
+}
+
+// Dummy data untuk fallback jika API belum jalan
+const dummyBooks: Book[] = [
+  {
+    id: 1,
+    title: "Judul Buku 1",
+    author: "Nama Penulis",
+    cover: "/public/image/book1.png",
+    rating: 4.5,
+  },
+  {
+    id: 2,
+    title: "Judul Buku 2",
+    author: "Nama Penulis",
+    cover: "/public/image/book2.png",
+    rating: 4.2,
+  },
+];
+
+export default function AuthorPage() {
+  const { id } = useParams(); // 👈 fix utama disini
+
+  return (
+    <>
+      <NavbarAfter />
+      <AuthorBooksSection authorId={Number(id)} />
+      <FooterSection />
+    </>
+  );
+}
+
+function AuthorBooksSection({ authorId }: { authorId: number }) {
+  const [books, setBooks] = useState<Book[]>(dummyBooks);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const res = await fetch(`/api/books?authorId=${authorId}`);
+        const data = await res.json();
+        if (data?.books?.length) setBooks(data.books);
+      } catch (err) {
+        console.error("Failed fetching books:", err);
+      }
+    };
+
+    fetchBooks();
+  }, [authorId]);
+
+  return (
+    <div className="mt-10 container">
+      <h2 className="text-xl font-semibold mb-5">Book List</h2>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        {books.slice(0, 4).map((book) => (
+          <div
+            key={book.id}
+            onClick={() => navigate(`/books/${book.id}`)}
+            className="bg-white rounded-xl shadow hover:shadow-md cursor-pointer"
+          >
+            <img
+              src={book.cover ?? "/public/image/default.png"}
+              alt={book.title}
+              className="rounded-t-xl w-full h-56 object-cover"
+            />
+            <div className="p-3">
+              <p className="font-semibold text-sm line-clamp-2">{book.title}</p>
+              <p className="text-gray-500 text-xs">{book.author}</p>
+              <div className="flex items-center text-xs mt-2 gap-1">
+                ⭐ {book.rating}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
