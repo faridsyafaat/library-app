@@ -14,7 +14,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
    <Provider store={store}>
   <QueryClientProvider client={queryClient}>
-   <HashRouter basename="/" >
+   <HashRouter basename="/">
   <App />
 </HashRouter>
   </QueryClientProvider>

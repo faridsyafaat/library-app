@@ -6,16 +6,11 @@ import HomeAfter from "@/pages/HomeAfter";
 import DetailPage from "@/pages/DetailPage";
 import CategoryPage from "@/pages/CategoryPage";
 import AuthorPage from "@/pages/AuthorPage";
-import MyCartPage from "@/pages/MyCartPage";
-import CheckoutPage from "@/pages/CheckoutPage";
-import BorrowSuccessPage from "@/pages/BorrowSuccessPage";
-import BorrowListPage from "@/pages/BorrowListPage";
-
+import MyCartPage from "./pages/MyCartPage";
 
 
 function App() {
   return (
-   <>
          <Routes>
         <Route path="/" element={<HomeBefore />} />
         <Route path="/login" element={<Login />} />
@@ -26,12 +21,8 @@ function App() {
         <Route path="/author/:id" element={<AuthorPage />} />
         <Route path="/detail/:id" element={<DetailPage />} />
         <Route path="/my-cart" element={<MyCartPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/borrow-success" element={<BorrowSuccessPage />} />
-        <Route path="/borrow-list" element={<BorrowListPage />} />
-
         </Routes>
-        </>
+        
       );
 }
 

@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import Button from "@/components/ui/Button";
 import { useAppSelector } from "@/store/hooks";
-import { useNavigate } from "react-router-dom";
 import NavbarAfter from "@/components/layout/NavbarAfter";
 import FooterSection from "@/components/layout/FooterSection";
 
@@ -30,15 +29,18 @@ interface CartResponse {
   };
 }
 
+
 export default function MyCartPage() {
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const token = useAppSelector((state) => state.auth.token);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
+  // Fetch cart data
   const fetchCart = async (): Promise<CartResponse> => {
     const res = await fetch("https://be-library-api-xh3x6c5iiq-et.a.run.app/api/cart", {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
+
     const json = await res.json();
     if (!res.ok) throw new Error(json?.message || `HTTP ${res.status}`);
     return json;
@@ -62,15 +64,45 @@ export default function MyCartPage() {
     );
   };
 
-  const handleBorrow = () => {
-    const selectedBooks = items.filter((i) => selectedItems.includes(i.id));
-    if (selectedBooks.length === 0) {
-      alert("No books selected");
-      return;
-    }
-    // Kirim state ke CheckoutPage
-    navigate("/checkout", { state: { selectedItems: selectedBooks } });
-  };
+  // Borrow Mutation
+  const borrowMutation = useMutation({
+  mutationFn: async () => {
+    console.log("Selected Items (cartItemIds):", selectedItems);
+
+    const payload = {
+      cartId: data?.data.cartId,
+      items: selectedItems.map((id) => ({ cartItemId: id })),
+    };
+
+    console.log("Borrow Payload:", payload);
+
+    const response = await fetch(
+      "https://be-library-api-xh3x6c5iiq-et.a.run.app/api/loans",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!response.ok) throw new Error(`Borrow request failed`);
+    return response.json();
+  },
+
+  onSuccess: () => {
+    alert("Borrow Success!");
+    queryClient.invalidateQueries({ queryKey: ["my-cart"] });
+    window.location.hash = "/checkout"; // HashRouter redirect
+  },
+
+  onError: (error) => {
+    console.error("Borrow Error:", error);
+    alert("Borrow Failed, check your cart or login again.");
+  },
+});
 
   if (isLoading) return <div className="p-6">Loading cart...</div>;
   if (isError) return <div className="p-6 text-red-500">Failed to load cart.</div>;
@@ -80,6 +112,7 @@ export default function MyCartPage() {
       <NavbarAfter />
 
       <div className="container grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+        {/* CART LIST */}
         <div className="md:col-span-2 space-y-4">
           <h1 className="text-3xl font-bold mb-4">My Cart</h1>
 
@@ -102,6 +135,7 @@ export default function MyCartPage() {
                   onChange={() => toggleItem(item.id)}
                   className="checkbox-round"
                 />
+
                 <img
                   src={item.book.coverImage}
                   alt={item.book.title}
@@ -109,6 +143,7 @@ export default function MyCartPage() {
                   height={80}
                   className="rounded object-cover"
                 />
+
                 <p className="font-medium">{item.book.title}</p>
               </Card>
             ))}
@@ -121,9 +156,11 @@ export default function MyCartPage() {
           </div>
         </div>
 
+        {/* SUMMARY */}
         <Card className="p-4 h-fit shadow">
           <CardContent>
             <h2 className="text-lg font-bold mb-4">Loan Summary</h2>
+
             <div className="flex justify-between mb-6">
               <span>Total Books</span>
               <span className="font-semibold">{selectedItems.length}</span>
@@ -131,10 +168,14 @@ export default function MyCartPage() {
 
             <Button
               className="w-full"
-              disabled={selectedItems.length === 0}
-              onClick={handleBorrow}
+              disabled={selectedItems.length === 0 || borrowMutation.isPending}
+              onClick={() => {
+                if (!data?.data) return;
+
+                borrowMutation.mutate();
+              }}
             >
-              Proceed to Checkout
+              {borrowMutation.isPending ? "Processing..." : "Borrow Book"}
             </Button>
           </CardContent>
         </Card>

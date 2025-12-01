@@ -2,7 +2,7 @@
   "name": "library-app",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://faridsyafaat.github.io/library-app",
+  "homepage":"https://faridsyafaat.github.io/library-app"
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -49,5 +49,4 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4"
-  }
-}
+  }}
